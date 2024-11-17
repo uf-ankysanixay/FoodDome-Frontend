@@ -1,18 +1,14 @@
 {
-    "routes": [
-      {
-        "route": "/import/*",
-        "serve": "/index.html",
-        "statusCode": 200
-      },
-      {
-        "route": "/**",
-        "serve": "/index.html",
-        "statusCode": 200
-      }
-    ],
+    "navigationFallback": {
+        "rewrite": "/index.html",
+        "exclude": [
+            "/assets/*",
+            "/images/*",
+            "/css/*",
+            "/js/*"
+        ]
+    },
     "mimeTypes": {
-      ".json": "application/json"
+        ".json": "application/json"
     }
-  }
-  
+}
