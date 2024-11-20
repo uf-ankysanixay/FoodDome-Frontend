@@ -14,13 +14,12 @@ interface FpscUploadFormProps {
     setSkippedRows: React.Dispatch<React.SetStateAction<any[]>>; // Add this line
 }
 
-
 const FpscUploadForm: React.FC<FpscUploadFormProps> = ({
     setJsonData,
     setJsonFile,
     setUploadSuccess,
     setMessage,
-    setUploadError
+    setUploadError,
 }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // State for selected files
     const [uploading, setUploading] = useState(false); // Upload status
@@ -40,29 +39,31 @@ const FpscUploadForm: React.FC<FpscUploadFormProps> = ({
             setUploadError(null);
 
             const formData = new FormData();
-            formData.append('file', selectedFiles[0]);
+            selectedFiles.forEach((file) => {
+                formData.append('files', file); // Append all files to 'files' field
+            });
 
             try {
                 const response = await axios.post(`${BASE_API_URL}/fpsc/upload-pdfs`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
 
-                const responseData = response.data[0];
+                const responseData = response.data;
                 if (responseData) {
                     setUploadSuccess(responseData.message);
-                    setJsonData(responseData.data); // Store JSON data
-                    setJsonFile(responseData.json_file); // Set JSON file name
+                    setJsonData(responseData.json?.data || []); // Store JSON data for the first file
+                    setJsonFile(responseData.json?.json_file || null); // Set JSON file name for the first file
                     setMessage(responseData.message); // Set success message
                 }
-
-            } catch (error: any) {  // Explicitly typing 'error' as 'any'
-                setUploadError(error.response?.data?.error || 'Error uploading file');
+            } catch (error: any) { // Explicitly typing 'error' as 'any'
+                setUploadError(error.response?.data?.error || 'Error uploading files');
             } finally {
                 setUploading(false);
             }
+        } else {
+            setUploadError('No files selected for upload.');
         }
     };
-
 
     return (
         <Card title="Upload">
@@ -71,6 +72,7 @@ const FpscUploadForm: React.FC<FpscUploadFormProps> = ({
                     <input
                         type="file"
                         id="file"
+                        multiple // Allow multiple files to be selected
                         onChange={handleFileChange}
                         className="file-input"
                         accept=".pdf"
@@ -103,7 +105,7 @@ const FpscUploadForm: React.FC<FpscUploadFormProps> = ({
                         className="btn btn-primary btn-outline px-4 py-2 font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
                         disabled={uploading}
                     >
-                        Upload
+                        {uploading ? 'Uploading...' : 'Upload'}
                     </button>
                 </div>
             </form>
