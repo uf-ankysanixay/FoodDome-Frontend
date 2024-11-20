@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Card from '../../../components/cards/Card';
+import config from '../../../helpers/config';
 
-const BASE_API_URL = 'http://127.0.0.1:5000/api';
+const BASE_API_URL = config.apiUrl;
 
 interface FpscUploadFormProps {
     setJsonData: React.Dispatch<React.SetStateAction<any[]>>;
